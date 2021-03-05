@@ -6,12 +6,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\Sanctum;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
     use WithFaker;
+    use RefreshDatabase;
     public function test_user_should_be_validate_for_register()
     {
         $response = $this->postJson(route('auth.register'));
@@ -29,10 +31,18 @@ class AuthTest extends TestCase
     }
     public function test_login_user()
     {
-        $this->withoutExceptionHandling();
         $user = User::factory()->create();
         $data = ['email' => $user->email, 'password' => 'password'];
         $response = $this->postJson(route('auth.login'), $data);
+        $response->assertStatus(Response::HTTP_OK);
+    }
+    public function test_logout_user()
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['*']
+        );
+        $response = $this->postJson(route('auth.logout'));
         $response->assertStatus(Response::HTTP_OK);
     }
 }

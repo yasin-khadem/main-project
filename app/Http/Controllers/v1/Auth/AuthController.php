@@ -7,7 +7,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Stmt\TryCatch;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -37,13 +39,22 @@ class AuthController extends Controller
             return response()->json(['message' => 'entity is unprocessable'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $credentials = request(['email', 'password']);
-        if (!Auth::attempt($credentials)) {
+        try {
+            Auth::attempt($credentials);
+            $user = User::where('email', $request->email)->first();
+            $token_result = $user->createToken('auth-token')->plainTextToken;
+            return response()->json(['message' => $token_result], Response::HTTP_OK);
+
+        } catch (Throwable $th) {
             return response()->json(['message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+
         }
-        $user = User::where('email', $request->email)->first();
-        $token_result = $user->createToken('auth-token')->plainTextToken;
-        return response([
-            'message' => $token_result
-        ], Response::HTTP_OK);
+        
+        
+    }
+    public function logout(Request $request){
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Token deleted successfully'], Response::HTTP_OK);
+
     }
 }
