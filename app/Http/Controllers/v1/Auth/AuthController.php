@@ -53,8 +53,12 @@ class AuthController extends Controller
         
     }
     public function logout(Request $request){
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Token deleted successfully'], Response::HTTP_OK);
+        try {
+            $request->user()->currentAccessToken()->delete();
+            return response()->json(['message' => 'Token deleted successfully'], Response::HTTP_OK);
+        } catch (Throwable $th) {
+            return response()->json(['message' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
+        }
 
     }
 }

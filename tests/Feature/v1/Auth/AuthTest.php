@@ -14,7 +14,13 @@ class AuthTest extends TestCase
 {
     use WithFaker;
     use RefreshDatabase;
-    public function test_user_should_be_validate_for_register()
+
+
+    /*
+    * test for register
+    */
+
+    public function test_register_request_should_be_validate()
     {
         $response = $this->postJson(route('auth.register'));
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -29,12 +35,36 @@ class AuthTest extends TestCase
         $response = $this->postJson(route('auth.register'), $data);
         $response->assertStatus(Response::HTTP_CREATED);
     }
+
+
+
+
+    /*
+     * test for login
+     */
+
+    public function test_login_request_should_be_validate()
+    {
+        $response = $this->postJson(route('auth.login'));
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
     public function test_login_user()
     {
         $user = User::factory()->create();
         $data = ['email' => $user->email, 'password' => 'password'];
         $response = $this->postJson(route('auth.login'), $data);
         $response->assertStatus(Response::HTTP_OK);
+    }
+
+
+    /*
+     * test for logout
+     */
+
+    public function test_logout_request_should_be_validate()
+    {
+        $response = $this->postJson(route('auth.logout'));
+        $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
     public function test_logout_user()
     {
